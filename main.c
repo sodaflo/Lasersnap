@@ -3,11 +3,11 @@
 #include <stdio.h>
 
 static void do_drawing(cairo_t *);
-
+static GtkWidget *window;
 struct {
   int count, savecount;
-  double coordx[100];
-  double coordy[100];
+  int coordx[100];
+  int coordy[100];
 }
 
 glob;
@@ -22,15 +22,15 @@ static void on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
 static void do_drawing(cairo_t *cr)
 {
+	int rectanglesize = 5; //Size of rectangle
 	g_print("do_drawing");
   cairo_set_source_rgb(cr, 22, 22, 0);
   cairo_set_line_width(cr, 5);
 
   int i, j;
   for (i = 0; i <= glob.count - 1; i++){
-	  cairo_rectangle(cr, glob.coordx[i]-5, glob.coordy[i]-5, 10, 10);
+	  cairo_rectangle(cr, glob.coordx[i]-rectanglesize/2, glob.coordy[i]-rectanglesize, rectanglesize, rectanglesize);
   }
-  //cairo_rectangle(cr, glob.coordx[glob.count-1], glob.coordy[glob.count-1], 10, 10);
   for (i = 0; i <= glob.count - 2; i++ ) {
           cairo_move_to(cr, glob.coordx[i], glob.coordy[i]);
           cairo_line_to(cr, glob.coordx[i+1], glob.coordy[i+1]);
@@ -42,19 +42,30 @@ static void do_drawing(cairo_t *cr)
   cairo_stroke(cr);
 }
 
-static void saving (GtkWidget *widget, gpointer   data)
-{
-	g_print ("Saving");
-	g_print ("%f", glob.savecount); 
-	FILE *file;
-		file = fopen("savings.txt", "a+");
-		int i = 0;
-		for(i = 0; i < glob.savecount; i++){
-			fprintf(file, "%f", glob.coordx[i]);
-			fprintf(file, "%s", "|");
-			fprintf(file, "%f", glob.coordy[i]);
-			fprintf(file, "%s", "\n");
+static void saving (GtkWidget *widget, gpointer data){
+	GtkWidget *dialog;
+	dialog = gtk_file_chooser_dialog_new ("Title", 
+										GTK_WINDOW(window),
+										GTK_FILE_CHOOSER_ACTION_SAVE,
+										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+										GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+										NULL);
+	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+		char *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		g_print("%s", file);
+		FILE *datei = fopen (file, "a+");
+		fprintf(datei, "TEST\n");
+		g_print("TEST");
+		int i;
+		for(i = 0; i < glob.count; i++){
+			fprintf(datei, "%i", glob.coordx[i]);
+			fprintf(datei, "%s", "|");
+			fprintf(datei, "%i", glob.coordy[i]);
+			fprintf(datei, "%s", "\n");
 		}
+		fclose(datei);
+	}
+	gtk_widget_destroy(dialog);
 }
 
 static void draw (GtkWidget *widget, GtkWidget *data){
@@ -77,7 +88,7 @@ int main (int   argc,
       char *argv[])
 {
   GtkBuilder *builder;
-  GtkWidget *window, *darea;
+  GtkWidget *darea;
   GObject *button;
 
   gtk_init (&argc, &argv);
