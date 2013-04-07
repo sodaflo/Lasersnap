@@ -24,14 +24,14 @@ static void do_drawing(cairo_t *cr)
 {
 	int rectanglesize = 5; //Size of rectangle
 	g_print("do_drawing");
-  cairo_set_source_rgb(cr, 22, 22, 0);
-  cairo_set_line_width(cr, 5);
+  	cairo_set_source_rgb(cr, 22, 22, 0);
+  	cairo_set_line_width(cr, 5);
 
-  int i, j;
-  for (i = 0; i <= glob.count - 1; i++){
-	  cairo_rectangle(cr, glob.coordx[i]-rectanglesize/2, glob.coordy[i]-rectanglesize, rectanglesize, rectanglesize);
-  }
-  for (i = 0; i <= glob.count - 2; i++ ) {
+  	int i, j;
+  	for (i = 0; i <= glob.count - 1; i++){
+		cairo_rectangle(cr, glob.coordx[i]-rectanglesize/2, glob.coordy[i]-rectanglesize, rectanglesize, rectanglesize);
+  	}
+  	for (i = 0; i <= glob.count - 2; i++ ) {
           cairo_move_to(cr, glob.coordx[i], glob.coordy[i]);
           cairo_line_to(cr, glob.coordx[i+1], glob.coordy[i+1]);
       }
@@ -42,28 +42,70 @@ static void do_drawing(cairo_t *cr)
   cairo_stroke(cr);
 }
 
+//open the Data
+static void open (GtkWidget *widget, gpointer data){
+	GtkWidget *dialog;
+	dialog = gtk_file_chooser_dialog_new ("Open",
+										GTK_WINDOW(window),
+										GTK_FILE_CHOOSER_ACTION_OPEN,
+										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+										GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+										NULL);
+	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT){
+		char ch, number;
+		char *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		g_print("%s", path);
+		FILE *file;
+		file = fopen(path, "r");
+		char *line = NULL;
+		int i = 0;
+		while(fscanf(file, "%3d|%3d", &glob.coordx[i], &glob.coordy[i]) == 2){
+		 	g_printf("%i|%i\n", glob.coordx[i], glob.coordy[i]);
+		 	i++;
+		 }
+		 glob.count = i;
+
+    gtk_widget_queue_draw(window);
+		fclose(file);
+
+		}
+	gtk_widget_destroy(dialog);
+}
+
+//save the Data
 static void saving (GtkWidget *widget, gpointer data){
 	GtkWidget *dialog;
-	dialog = gtk_file_chooser_dialog_new ("Title", 
+	dialog = gtk_file_chooser_dialog_new ("Save", 
 										GTK_WINDOW(window),
 										GTK_FILE_CHOOSER_ACTION_SAVE,
 										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
 										NULL);
 	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-		char *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		g_print("%s", file);
-		FILE *datei = fopen (file, "a+");
-		fprintf(datei, "TEST\n");
+		char *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		g_print("%s", path);
+		FILE *file = fopen (path, "a+");
 		g_print("TEST");
 		int i;
 		for(i = 0; i < glob.count; i++){
-			fprintf(datei, "%i", glob.coordx[i]);
-			fprintf(datei, "%s", "|");
-			fprintf(datei, "%i", glob.coordy[i]);
-			fprintf(datei, "%s", "\n");
+			if(glob.coordx[i] < 100){
+				if(glob.coordx[i] < 10){
+					fprintf(file, "0");
+				}
+				fprintf(file, "0");
+			}
+			fprintf(file, "%i", glob.coordx[i]);
+			fprintf(file, "%s", "|");
+			if(glob.coordy[i] < 100){
+				if(glob.coordy[i] < 10){
+					fprintf(file, "0");
+				}
+				fprintf(file, "0");
+			}
+			fprintf(file, "%i", glob.coordy[i]);
+			fprintf(file, "%s", "\n");
 		}
-		fclose(datei);
+		fclose(file);
 	}
 	gtk_widget_destroy(dialog);
 }
@@ -103,7 +145,10 @@ int main (int   argc,
 
 
   button = gtk_builder_get_object (builder, "buttonsave");
-  g_signal_connect (button, "clicked", G_CALLBACK (saving), NULL);
+  g_signal_connect (button, "clicked", G_CALLBACK(saving), NULL);
+  
+  button = gtk_builder_get_object (builder, "buttonopen");
+  g_signal_connect (button, "clicked", G_CALLBACK(open), NULL);
 
   button = gtk_builder_get_object (builder, "buttondraw");
   g_signal_connect (button, "clicked", G_CALLBACK (draw), window);
