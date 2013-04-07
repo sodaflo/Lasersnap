@@ -1,6 +1,7 @@
 #include <cairo.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 static void do_drawing(cairo_t *);
 static GtkWidget *window;
@@ -8,6 +9,8 @@ struct {
   int count, savecount;
   int coordx[100];
   int coordy[100];
+  bool isclicked;
+  int change;
 }
 
 glob;
@@ -119,10 +122,33 @@ static void draw (GtkWidget *widget, GtkWidget *data){
 //Save the position of the clik in glob.coordx
 static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
 	g_print ("clicked");
-	glob.coordx[glob.count] = event->x;
-	glob.coordy[glob.count] = event->y;
-	glob.count++;
-	gtk_widget_queue_draw(widget);
+	int x = event ->x;
+	int y = event ->y;
+	int i;
+	bool onrectangle = FALSE;
+	if(!glob.isclicked){
+		for(i = 0; i < glob.count; i++){
+			if(x > glob.coordx[i] - 10 && x < glob.coordx[i] + 10 && y < glob.coordy[i] + 10 && y > glob.coordy[i] - 10){
+				onrectangle = TRUE;
+				glob.isclicked = TRUE;
+				glob.change = i;
+			}
+		}
+		g_printf("%i", glob.change);
+	}
+	if(!onrectangle && !glob.isclicked){
+		glob.coordx[glob.count] = event->x;
+		glob.coordy[glob.count] = event->y;
+		glob.count++;
+		gtk_widget_queue_draw(widget);
+	}
+	if(glob.isclicked && !onrectangle){
+		g_printf("istgeklickt");
+		glob.coordx[glob.change] = event->x;
+		glob.coordy[glob.change] = event->y;
+		gtk_widget_queue_draw(widget);
+		glob.isclicked = FALSE;
+	}
 	return TRUE;
 }
 
@@ -167,4 +193,3 @@ int main (int   argc,
 
   return 0;
 }
-
