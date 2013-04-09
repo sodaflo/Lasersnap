@@ -9,8 +9,8 @@ struct {
   int count, savecount;
   int coordx[100];
   int coordy[100];
-  bool isclicked;
-  int change;
+  bool isclicked;//when a point is clicked isclicked becomes TRUE
+  int change;//contains the number of the rectangle that is clicked
 }
 
 glob;
@@ -23,14 +23,14 @@ static void on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_destroy(cr);
 }
 
+
 static void do_drawing(cairo_t *cr)
 {
-	int rectanglesize = 5; //Size of rectangle
+	int rectanglesize = 5;
 	g_print("do_drawing");
   	cairo_set_source_rgb(cr, 22, 22, 0);
   	cairo_set_line_width(cr, 5);
-
-  	int i, j;
+  	int i;
   	for (i = 0; i <= glob.count - 1; i++){
 		cairo_rectangle(cr, glob.coordx[i]-rectanglesize/2, glob.coordy[i]-rectanglesize, rectanglesize, rectanglesize);
   	}
@@ -38,6 +38,7 @@ static void do_drawing(cairo_t *cr)
           cairo_move_to(cr, glob.coordx[i], glob.coordy[i]);
           cairo_line_to(cr, glob.coordx[i+1], glob.coordy[i+1]);
       }
+  //cairo_close_path(cr);
   cairo_move_to(cr, glob.coordx[i], glob.coordy[i]);
   cairo_line_to(cr, glob.coordx[0], glob.coordy[0]);
   glob.savecount = glob.count;
