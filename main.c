@@ -23,7 +23,7 @@ static void on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_destroy(cr);
 }
 
-
+//function to draw the lines with cairo
 static void do_drawing(cairo_t *cr)
 {
 	int rectanglesize = 5;
@@ -38,7 +38,6 @@ static void do_drawing(cairo_t *cr)
           cairo_move_to(cr, glob.coordx[i], glob.coordy[i]);
           cairo_line_to(cr, glob.coordx[i+1], glob.coordy[i+1]);
       }
-  //cairo_close_path(cr);
   cairo_move_to(cr, glob.coordx[i], glob.coordy[i]);
   cairo_line_to(cr, glob.coordx[0], glob.coordy[0]);
   glob.savecount = glob.count;
@@ -63,8 +62,10 @@ static void open (GtkWidget *widget, gpointer data){
 		file = fopen(path, "r");
 		char *line = NULL;
 		int i = 0;
-		while(fscanf(file, "%3d|%3d", &glob.coordx[i], &glob.coordy[i]) == 2){
-		 	g_printf("%i|%i\n", glob.coordx[i], glob.coordy[i]);
+		int buffer;
+		//buffer = getc(file);
+		while(fscanf(file, "%1d|%3d|%3d", &buffer, &glob.coordx[i], &glob.coordy[i]) != EOF){
+		 	g_printf("%i|%i|%i\n", buffer, glob.coordx[i], glob.coordy[i]);
 		 	i++;
 		 }
 		 glob.count = i;
@@ -92,6 +93,12 @@ static void saving (GtkWidget *widget, gpointer data){
 		g_print("TEST");
 		int i;
 		for(i = 0; i < glob.count; i++){
+			if(i == 0 || i == glob.count-1){
+				fprintf(file, "0|");
+			}
+				else{
+					fprintf(file, "1|");
+			}
 			if(glob.coordx[i] < 100){
 				if(glob.coordx[i] < 10){
 					fprintf(file, "0");

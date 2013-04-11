@@ -60,20 +60,21 @@ void loop() {
       statuss = false;
       Serial.print("on");
     }*/
-    if(stat == 80){ //if first character ist P Laser will be turned on
+    if(stat == 49){ //if first character ist P Laser will be turned on
       statuss = true;
     }
       else{
         statuss = false;
     }
+    Serial.read();
     delay(40);
-    coordx = getint();
-    delay(40);
-    coordy = getint();
     Serial.print("Status:");
     Serial.print(statuss);
-    Serial.print("x:");
+    coordx = getint();
+    Serial.print("  x:");
     Serial.print(coordx);
+    delay(40);
+    coordy = getint();
     Serial.print("  y:");
     Serial.println(coordy);
     movelaser(coordx, coordy, statuss);
@@ -149,17 +150,17 @@ int getint(){
   int number = 0;
   int get[20];
   int i = 0;
-    while(Serial.available() > 0 && get[i] != 76){
+  for(i = 0; i < 3; i){
       get[i] = Serial.read() - 48;
-      if(get[i] != 76){
+      if(get[i] < 11){
       if(get[i] == -3){
         minus = true;
       }
       else{
       i++;
       }
-      }
       delay(30);
+      }
     }
     i--;
     if(i > 0){
@@ -180,4 +181,3 @@ int getint(){
   }
   return number;
 }
-
