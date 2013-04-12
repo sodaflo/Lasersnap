@@ -2,6 +2,7 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "send.h"
 
 static void do_drawing(cairo_t *);
 static GtkWidget *window;
@@ -46,7 +47,7 @@ static void do_drawing(cairo_t *cr)
 }
 
 //open the Data
-static void open (GtkWidget *widget, gpointer data){
+static void opendata(GtkWidget *widget, gpointer data){
 	GtkWidget *dialog;
 	dialog = gtk_file_chooser_dialog_new ("Open",
 										GTK_WINDOW(window),
@@ -123,8 +124,15 @@ static void saving (GtkWidget *widget, gpointer data){
 
 static void draw (GtkWidget *widget, GtkWidget *data){
 	g_print("draw");
-	glob.count = 0;
+	//glob.count = 0;
+	g_printf("HI");
     gtk_widget_queue_draw(data);
+    g_printf("HI");
+    char strings[80];
+    g_printf("Hi");
+    sprintf(strings, "%i", glob.coordx[1]);
+    g_printf(strings);
+    send(0, strings);
 }
 
 //Save the position of the clik in glob.coordx
@@ -182,7 +190,7 @@ int main (int   argc,
   g_signal_connect (button, "clicked", G_CALLBACK(saving), NULL);
   
   button = gtk_builder_get_object (builder, "buttonopen");
-  g_signal_connect (button, "clicked", G_CALLBACK(open), NULL);
+  g_signal_connect (button, "clicked", G_CALLBACK(opendata), NULL);
 
   button = gtk_builder_get_object (builder, "buttondraw");
   g_signal_connect (button, "clicked", G_CALLBACK (draw), window);

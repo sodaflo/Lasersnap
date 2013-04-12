@@ -60,13 +60,14 @@ void loop() {
       statuss = false;
       Serial.print("on");
     }*/
-    if(stat == 80){ //if first character ist P Laser will be turned on
+    if(stat == 49){ //if first character ist P Laser will be turned on
       statuss = true;
     }
       else{
         statuss = false;
     }
     delay(40);
+    Serial.read();
     coordx = getint();
     delay(40);
     coordy = getint();

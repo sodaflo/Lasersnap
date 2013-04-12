@@ -2,15 +2,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
-
-//#include <sys/time.h>
 #include <sys/types.h>
 
 
 #define TERM_DEVICE "/dev/ttyACM0"
 #define TERM_SPEED B9600
 
-int main(){
+void sendingdata(void){
 	int fd, old_flags;
 	ssize_t length;
 	char buffer[16];
@@ -78,5 +76,4 @@ int main(){
 
 	printf("Aborted. \n");
 	close(fd);
-	return(0);
 }
